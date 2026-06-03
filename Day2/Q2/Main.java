@@ -1,54 +1,93 @@
 package Day2.Q2;
 
-interface PaymentStrategy{
-    boolean processPayment(double amount);
+abstract class DeliveryDrone{
+    protected String droneId;
+
+    public DeliveryDrone(String droneId){
+        this.droneId= droneId;
+    }
+
+    public abstract void deliverPackage();
 }
 
-class CreditCardStrategy implements PaymentStrategy{
+interface Airborne{
+    void flyToDestination();
+
+    default void requestAirTrafficClearance(){
+        System.out.println("Air Traffic Clearance Granted.");
+    }
+}
+
+interface GroundBased{
+    void navigateSidewalks();
+}
+
+class Quadcopter extends DeliveryDrone implements Airborne{
+    public Quadcopter(String droneId){
+        super(droneId);
+    }
+
     @Override
-    public boolean processPayment(double amount){
-        System.out.println("Process Credit Card payment of rs. " + amount);
-        return true;
+    public void flyToDestination(){
+        System.out.println("Quadcopter" + droneId+ " flying to destinationj.");
     }
-}
 
-class CryptoStrategy implements PaymentStrategy{
     @Override
-    public boolean processPayment(double amount){
-        System.out.println("Process Cryptocurrency payment of Rs. "+amount);
-        return true;
+    public void deliverPackage(){
+        requestAirTrafficClearance();
+        flyToDestination();
+        System.out.println("Package delivered by Quadcopter.\n");
     }
 }
 
-class TransactionProcessor{
-    private PaymentStrategy strategy;
-
-    public TransactionProcessor(PaymentStrategy strategy){
-        this.strategy= strategy;
+class CityRover extends DeliveryDrone implements GroundBased{
+    public CityRover(String droneId){
+        super(droneId);
     }
 
-    public void setPaymentStrategy(PaymentStrategy strategy){
-        this.strategy= strategy;
+    @Override
+    public void navigateSidewalks(){
+        System.out.println("CityRover "+ droneId+ "navigating sidewalks.");
     }
 
-    // now this is the actual delegation logic
-    public void executeTransaction(double amount){
-        if(strategy.processPayment(amount)){
-            System.out.println("Transaction Successful\n");
-        }
-        else{
-            System.out.println("Transaction Failed\n");
-        }
+    @Override
+    public void deliverPackage(){
+        navigateSidewalks();
+        System.out.println("package delivered by City Rover.\n");
     }
 }
 
+class HybridVTOL extends DeliveryDrone implements Airborne, GroundBased{
+    public HybridVTOL(String droneId){
+        super(droneId);
+    }
+
+    @Override
+    public void flyToDestination(){
+        System.out.println("HybridVTOL " + droneId+ " flying to Destination.");
+    }
+
+    @Override
+    public void navigateSidewalks(){
+        System.out.println("HybridVTOL "+ droneId+ " navigating on ground.");
+    }
+
+    @Override
+    public void deliverPackage(){
+        requestAirTrafficClearance();
+        flyToDestination();
+        navigateSidewalks();
+        System.out.println("Package delivered by HybridVTOL.\n");
+    }
+}
 public class Main {
     public static void main(String[] args){
-        TransactionProcessor processor= new TransactionProcessor(new CreditCardStrategy());
+        DeliveryDrone d1 = new Quadcopter("Q101");
+        DeliveryDrone d2 = new CityRover("C202");
+        DeliveryDrone d3= new HybridVTOL("H303");
 
-        processor.executeTransaction(5000);
-
-        processor.setPaymentStrategy(new CryptoStrategy());
-        processor.executeTransaction(2500);
+        d1.deliverPackage();
+        d2.deliverPackage();
+        d3.deliverPackage();
     }
 }
